@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import List
 
 from . import models, schemas, database
@@ -61,3 +62,13 @@ def eliminar_curso(curso_id: int, db: Session = Depends(database.get_db)):
     db.delete(curso_db)
     db.commit()
     return {"mensaje": "Curso eliminado correctamente"}
+
+@app.get("/cursos-stats/total-creditos", tags=["Estadísticas"])
+def obtener_total_creditos(db: Session = Depends(database.get_db)):
+    # Ejecutamos el procedimiento almacenado directamente en SQL Server
+    resultado = db.execute(text("EXEC sp_TotalCreditos")).fetchone()
+    
+    return {
+        "mensaje": "Cálculo realizado mediante Procedimiento Almacenado",
+        "total_creditos": resultado[0]
+    }
